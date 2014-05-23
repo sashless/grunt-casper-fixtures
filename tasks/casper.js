@@ -7,7 +7,8 @@ module.exports = function (grunt) {
     var casperlib = require('./lib/casper').init(grunt);
     //get the duration of each casper task
     var Duration = require("duration");
-
+    // path resolver
+    var path = require('path');
 
     grunt.registerMultiTask('casper', 'execute casperjs tasks', function () {
         var args = Array.prototype.slice.call(arguments),
@@ -28,6 +29,20 @@ module.exports = function (grunt) {
         }
 
         grunt.verbose.writeflags(args, 'Arguments');
+
+        var getFixture = function(file){
+            // because its not a string
+            var splitStore = path.resolve(file.src + '').split('/');
+            var fileName = splitStore.pop().replace('.js', '.json');
+            var tag = splitStore.pop();
+            var fixture = path.resolve(options.fixtures + '/' + tag + '/' + fileName);
+            // file exists ?
+            if(grunt.file.exists(fixture)){
+                return grunt.file.readJSON(fixture);
+            }
+
+            return false;
+        };
 
         this.files.forEach(function (file) {
             if (file.src.length) {
@@ -50,16 +65,34 @@ module.exports = function (grunt) {
                         //Don't Pass this through to spawn
                         delete options.concurrency;
                     }
+
                     //Run Tests In Parallel
                     if (file.src) {
-                        grunt.util.async.forEachLimit(file.src, concurrency, function (srcFile, next) {
-                            //Spawn Child Process
-                            casperlib.execute(srcFile, file.dest !== 'src' ? file.dest : null, options, args, next);
-                        }, function (err) {
-                            if (err) grunt.log.write('error:', err);
-                            //Call Done and Log Duration
-                            taskComplete(err);
-                        });
+                        grunt.log.ok(' ==> running ' + file.src);
+                        //has a fixture
+                        var fixture = getFixture(file);
+                        if(fixture){
+                            fixture.forEach(function(fixtureData){
+                                options.fixture = escape(JSON.stringify(fixtureData));
+                                //Spawn Child Process
+                                grunt.util.async.forEachLimit(file.src, concurrency, function (srcFile, next) {
+                                    casperlib.execute(srcFile, file.dest !== 'src' ? file.dest : null, options, args, next);
+                                }, function (err) {
+                                    if (err) grunt.log.write('error:', err);
+                                    //Call Done and Log Duration
+                                    taskComplete(err);
+                                });
+                            });
+                        }else{
+                            grunt.log.warn(' == > fixture not found.' + file.src + '');
+                            grunt.util.async.forEachLimit(file.src, concurrency, function (srcFile, next) {
+                                casperlib.execute(srcFile, file.dest !== 'src' ? file.dest : null, options, args, next);
+                            }, function (err) {
+                                if (err) grunt.log.write('error:', err);
+                                //Call Done and Log Duration
+                                taskComplete(err);
+                            });
+                        }
                     }
                 } else {
 
