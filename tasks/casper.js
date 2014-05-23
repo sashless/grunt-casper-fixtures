@@ -10,6 +10,13 @@ module.exports = function (grunt) {
     // path resolver
     var path = require('path');
 
+    Array.prototype.chunk = function(chunkSize) {
+        var R = [];
+        for (var i=0; i<this.length; i+=chunkSize)
+            R.push(this.slice(i,i+chunkSize));
+        return R;
+    };
+
     grunt.registerMultiTask('casper', 'execute casperjs tasks', function () {
         var args = Array.prototype.slice.call(arguments),
             options = this.options(),
@@ -54,10 +61,10 @@ module.exports = function (grunt) {
                     //Set Default Concurrency at 5 (Supposed Memory Leak > 10)
                     var concurrency = 5;
                     if (options.concurrency) {
-                        if (concurrency > 10) {
+                        if (options.concurrency > 10) {
                             grunt.verbose.writeln('Concurrency Too High. Max 10, updating to 10.');
                             concurrency = 10;
-                        } else if (concurrency < 1) {
+                        } else if (options.concurrency < 1) {
                             grunt.verbose.writeln('Concurrency Too Low. Min 1, updating to default 5.');
                         } else {
                             concurrency = options.concurrency;
@@ -68,12 +75,12 @@ module.exports = function (grunt) {
 
                     //Run Tests In Parallel
                     if (file.src) {
-                        grunt.log.ok(' ==> running ' + file.src);
                         //has a fixture
                         var fixture = getFixture(file);
                         if(fixture){
+                            fixture = fixture.chunk(concurrency);
                             fixture.forEach(function(fixtureData){
-                                options.fixture = escape(JSON.stringify(fixtureData));
+                                options.fixtureData = escape(JSON.stringify(fixtureData));
                                 //Spawn Child Process
                                 grunt.util.async.forEachLimit(file.src, concurrency, function (srcFile, next) {
                                     casperlib.execute(srcFile, file.dest !== 'src' ? file.dest : null, options, args, next);
@@ -84,7 +91,6 @@ module.exports = function (grunt) {
                                 });
                             });
                         }else{
-                            grunt.log.warn(' == > fixture not found.' + file.src + '');
                             grunt.util.async.forEachLimit(file.src, concurrency, function (srcFile, next) {
                                 casperlib.execute(srcFile, file.dest !== 'src' ? file.dest : null, options, args, next);
                             }, function (err) {
