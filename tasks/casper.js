@@ -82,8 +82,11 @@ module.exports = function (grunt) {
                             var fixture = getFixture(srcFile, options.fixtures, fileConcurrency);
                             if (fixture) {
                                 fixtures[srcFile] = [];
-                                fixture.forEach(function (item) {
-                                    file.src.push(srcFile);
+                                fixture.forEach(function (item, index) {
+                                    //because its already there one time
+                                    if(index < fixture.length-1){
+                                        file.src.push(srcFile);
+                                    }
                                     fixtures[srcFile].push(item);
                                 });
                             }
