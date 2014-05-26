@@ -74,28 +74,28 @@ module.exports = function (grunt) {
                         delete options.concurrency;
                     }
 
-                    var fixtures = [];
-                    file.src.forEach(function (srcFile) {
-                        var fixture = getFixture(srcFile, options.fixtures, fileConcurrency);
-                        if (fixture) {
-                            fixture[file] = [];
-                            fixture.forEach(function (item) {
-                                file.src.push(file);
-                                fixture[file].push(item);
-                            });
-                        }
-                    });
-
                     var dest = file.dest !== 'src' ? file.dest : null;
                     //Run Tests In Parallel
                     if (file.src) {
+                        var fixtures = [];
+                        file.src.forEach(function (srcFile) {
+                            var fixture = getFixture(srcFile, options.fixtures, fileConcurrency);
+                            if (fixture) {
+                                fixtures[srcFile] = [];
+                                fixture.forEach(function (item) {
+                                    file.src.push(srcFile);
+                                    fixtures[srcFile].push(item);
+                                });
+                            }
+                        });
                         grunt.util.async.forEachLimit(file.src, fileConcurrency, function (srcFile, next) {
-                            var testOptions = Array.prototype.slice.call(options);
                             if (typeof fixtures[srcFile] !== 'undefined') {
-                                testOptions.fixture = fixtures[srcFile].pop();
+                                options.fixture = fixtures[srcFile].pop();
+                            }else{
+                                delete options.fixture;
                             }
 
-                            casperlib.execute(srcFile, dest, testOptions, args, next);
+                            casperlib.execute(srcFile, dest, options, args, next);
                         }, function (err) {
                             if (err) grunt.log.write('error:', err);
                             //Call Done and Log Duration
