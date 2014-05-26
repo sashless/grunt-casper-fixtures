@@ -129,6 +129,27 @@ casper : {
 }
 ```
 
+Using fixtures
+
+```js
+casper : {
+    yourTask: {
+        options: {
+            test: true,
+            concise: true,
+            chunkSize: 2, // number of chunks created from json fixture
+            fixtureDir: path.resolve('test/fixtures/'),
+            parallel: true,
+            concurrency: 5
+        },
+        src: [path.resolve('test/fixtures/testFixtures.js')]
+    }
+}
+```
+
+- [example fixture](grunt-casper-fixtures/blob/master/test/fixtures/fixtureTest.json) file
+- [example test](grunt-casper-fixtures/blob/master/test/fixtures/fixtureTest.js) to use fixtures
+
 Global options and custom destination
 
 ```js
@@ -182,6 +203,7 @@ Arguments and options will be ignored in `test` mode as CasperJS does not suppor
 
 ## Release History
 
+ * 2014-27-05   v2.0     Fixed bug in concurrency, be able to use json fixtures passed to testfile
  * 2014-05-12   v0.3.8   Removed test arguments constraint
  * 2014-04-24   v0.3.7   Merge pull request #39 add no-colors option
  * 2014-04-21   v0.3.6   Fixed issue with testableOptions
@@ -208,4 +230,4 @@ Arguments and options will be ignored in `test` mode as CasperJS does not suppor
 
 ---
 
-Task submitted by [Chris Miller](http://chris-miller.me)
+Task submitted by [Chris Miller](http://chris-miller.me), [Sascha Weniger](http://sashless.de)
