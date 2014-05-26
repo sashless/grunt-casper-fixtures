@@ -147,8 +147,8 @@ casper : {
 }
 ```
 
-- [example fixture](grunt-casper-fixtures/blob/master/test/fixtures/fixtureTest.json) file
-- [example test](grunt-casper-fixtures/blob/master/test/fixtures/fixtureTest.js) to use fixtures
+- [example fixture file](https://github.com/sashless/grunt-casper-fixtures/blob/master/test/fixtures/testFixtures.json)
+- [example test](https://github.com/sashless/grunt-casper-fixtures/blob/master/test/fixtures/testFixtures.js)
 
 Global options and custom destination
 
