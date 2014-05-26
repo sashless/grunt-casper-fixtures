@@ -1,7 +1,7 @@
 {
   "name": "grunt-casper-fixtures",
   "description": "Run Casper CLI Scripts With Grunt",
-  "version": "2.0",
+  "version": "0.3.8",
   "author": [
     {
       "name": "Chris Miller",
