@@ -1,4 +1,5 @@
 /*global module:false*/
+var path = require('path');
 module.exports = function (grunt) {
     "use strict";
     grunt.initConfig({
@@ -115,12 +116,13 @@ module.exports = function (grunt) {
             fixture: {
                 options: {
                     test: true,
-                    chunkSize: 10, // number of chunks created from json fixture
-                    fixtureDir: 'fixtures/',
+                    concise: true,
+                    chunkSize: 2, // number of chunks created from json fixture
+                    fixtureDir: path.resolve('test/fixtures/'),
                     parallel: true,
                     concurrency: 5
                 },
-                src: ['test/fixtures/testFixtures.js']
+                src: [path.resolve('test/fixtures/testFixtures.js')]
             }
 
         },
