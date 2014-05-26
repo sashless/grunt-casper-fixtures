@@ -44,6 +44,13 @@ module.exports = function (grunt) {
             delete options.fixtureDir;
         }
 
+        var chunkSize = 10;
+
+        if (options.chunkSize) {
+            chunkSize = options.chunkSize;
+            delete options.chunkSize;
+        }
+
         var getFixture = function (file, chunkSize) {
             // because its not a string
             var splitStore = path.resolve(file).split('/');
@@ -87,7 +94,7 @@ module.exports = function (grunt) {
                     if (file.src) {
                         var fixtures = [];
                         file.src.forEach(function (srcFile) {
-                            var fixture = getFixture(srcFile, fileConcurrency);
+                            var fixture = getFixture(srcFile, chunkSize);
                             if (fixture) {
                                 // if just one item is there
                                 fixtures[srcFile] = [fixture.pop()];
