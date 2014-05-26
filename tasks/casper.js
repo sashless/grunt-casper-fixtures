@@ -37,8 +37,12 @@ module.exports = function (grunt) {
 
         grunt.verbose.writeflags(args, 'Arguments');
 
-        var fixtureDir = options.fixtureDir ? options.fixtureDir : '';
-        delete options.fixtureDir;
+        var fixtureDir = '';
+
+        if(options.fixtureDir){
+            fixtureDir = options.fixtureDir;
+            delete options.fixtureDir;
+        }
 
         var getFixture = function (file, chunkSize) {
             // because its not a string
