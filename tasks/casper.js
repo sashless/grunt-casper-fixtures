@@ -10,10 +10,10 @@ module.exports = function (grunt) {
     // path resolver
     var path = require('path');
 
-    Array.prototype.chunk = function(chunkSize) {
+    Array.prototype.chunk = function (chunkSize) {
         var R = [];
-        for (var i=0; i<this.length; i+=chunkSize)
-            R.push(this.slice(i,i+chunkSize));
+        for (var i = 0; i < this.length; i += chunkSize)
+            R.push(this.slice(i, i + chunkSize));
         return R;
     };
 
@@ -37,18 +37,24 @@ module.exports = function (grunt) {
 
         grunt.verbose.writeflags(args, 'Arguments');
 
-        var getFixture = function(file){
+        var getFixture = function (file, fixtureDir, chunkSize) {
             // because its not a string
-            var splitStore = path.resolve(file.src + '').split('/');
+            var splitStore = path.resolve(file).split('/');
             var fileName = splitStore.pop().replace('.js', '.json');
             var tag = splitStore.pop();
-            var fixture = path.resolve(options.fixtures + '/' + tag + '/' + fileName);
+            var fixture = path.resolve(fixtureDir + '/' + tag + '/' + fileName);
             // file exists ?
-            if(grunt.file.exists(fixture)){
-                return grunt.file.readJSON(fixture);
+            if (grunt.file.exists(fixture)) {
+                var fixtureData = grunt.file.readJSON(fixture);
+                return fixtureData.chunk(chunkSize);
             }
 
             return false;
+        };
+
+        var addFixtureToOptions = function (fixtureData) {
+            if (options.fixtures)
+                options.fixture = escape(JSON.stringify(fixtureData))
         };
 
         this.files.forEach(function (file) {
@@ -59,49 +65,47 @@ module.exports = function (grunt) {
                     delete options.parallel;
                     //https://github.com/gruntjs/grunt-contrib-sass/issues/16
                     //Set Default Concurrency at 5 (Supposed Memory Leak > 10)
-                    var concurrency = 5;
+                    var fileConcurrency = 5;
                     if (options.concurrency) {
                         if (options.concurrency > 10) {
                             grunt.verbose.writeln('Concurrency Too High. Max 10, updating to 10.');
-                            concurrency = 10;
+                            fileConcurrency = 10;
                         } else if (options.concurrency < 1) {
                             grunt.verbose.writeln('Concurrency Too Low. Min 1, updating to default 5.');
                         } else {
-                            concurrency = options.concurrency;
+                            fileConcurrency = options.concurrency;
                         }
                         //Don't Pass this through to spawn
                         delete options.concurrency;
                     }
 
+                    var originalFileConcurrency = fileConcurrency;
                     //Run Tests In Parallel
                     if (file.src) {
-                        //has a fixture
-                        var fixture = getFixture(file);
-                        if(fixture){
-                            fixture = fixture.chunk(concurrency);
-                            fixture.forEach(function(fixtureData){
-                                options.fixtureData = escape(JSON.stringify(fixtureData));
-                                //Spawn Child Process
-                                grunt.util.async.forEachLimit(file.src, concurrency, function (srcFile, next) {
-                                    casperlib.execute(srcFile, file.dest !== 'src' ? file.dest : null, options, args, next);
+                        grunt.util.async.forEachLimit(file.src, fileConcurrency, function (srcFile, next) {
+                            var fixtures = getFixture(srcFile, options.fixtures, 10);
+                            if (fixtures) {
+                                fileConcurrency = 1;
+                                grunt.util.async.forEachLimit(fixtures, 10, function (fixture, nextFixture) {
+                                    addFixtureToOptions(fixture);
+                                    casperlib.execute(srcFile, file.dest !== 'src' ? file.dest : null, options, args, nextFixture);
                                 }, function (err) {
                                     if (err) grunt.log.write('error:', err);
                                     //Call Done and Log Duration
                                     taskComplete(err);
                                 });
-                            });
-                        }else{
-                            grunt.util.async.forEachLimit(file.src, concurrency, function (srcFile, next) {
+                            } else {
+                                fileConcurrency = originalFileConcurrency;
                                 casperlib.execute(srcFile, file.dest !== 'src' ? file.dest : null, options, args, next);
-                            }, function (err) {
-                                if (err) grunt.log.write('error:', err);
-                                //Call Done and Log Duration
-                                taskComplete(err);
-                            });
-                        }
+                            }
+
+                        }, function (err) {
+                            if (err) grunt.log.write('error:', err);
+                            //Call Done and Log Duration
+                            taskComplete(err);
+                        });
                     }
                 } else {
-
                     if (file.src) {
                         casperlib.execute(file.src, file.dest, options, args, function (err) {
                             //Call Done and Log Duration
@@ -113,5 +117,9 @@ module.exports = function (grunt) {
                 grunt.fail.warn('Unable to compile; no valid source files were found.');
             }
         });
+
+        if (options.fixtures) {
+            delete options.fixtures;
+        }
     });
 };
