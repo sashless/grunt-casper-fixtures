@@ -39,7 +39,7 @@ module.exports = function (grunt) {
 
         var fixtureDir = '';
 
-        if(options.fixtureDir){
+        if (options.fixtureDir) {
             fixtureDir = options.fixtureDir;
             delete options.fixtureDir;
         }
@@ -89,10 +89,12 @@ module.exports = function (grunt) {
                         file.src.forEach(function (srcFile) {
                             var fixture = getFixture(srcFile, fileConcurrency);
                             if (fixture) {
-                                fixtures[srcFile] = [];
+                                // if just one item is there
+                                fixtures[srcFile] = [fixture.pop()];
+                                // for multiple items
                                 fixture.forEach(function (item, index) {
                                     //because its already there one time
-                                    if(index < fixture.length-1){
+                                    if (index < fixture.length - 1) {
                                         file.src.push(srcFile);
                                     }
                                     fixtures[srcFile].push(item);
@@ -100,7 +102,7 @@ module.exports = function (grunt) {
                             }
                         });
                         grunt.util.async.forEachLimit(file.src, fileConcurrency, function (srcFile, next) {
-                            if(options.fixtures){
+                            if (options.fixtures) {
                                 delete options.fixtures;
                             }
 
