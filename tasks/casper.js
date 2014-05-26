@@ -52,11 +52,6 @@ module.exports = function (grunt) {
             return false;
         };
 
-        var addFixtureToOptions = function (fixtureData) {
-            if (options.fixtures)
-                options.fixture = escape(JSON.stringify(fixtureData))
-        };
-
         this.files.forEach(function (file) {
             if (file.src.length) {
                 //Allow Files in each task to be run concurrently
@@ -79,21 +74,28 @@ module.exports = function (grunt) {
                         delete options.concurrency;
                     }
 
-                    var originalFileConcurrency = fileConcurrency;
+                    var fixtures = [];
+                    file.src.forEach(function (srcFile) {
+                        var fixture = getFixture(srcFile, options.fixtures, fileConcurrency);
+                        if (fixture) {
+                            fixture[file] = [];
+                            fixture.forEach(function (item) {
+                                file.src.push(file);
+                                fixture[file].push(item);
+                            });
+                        }
+                    });
+
+                    var dest = file.dest !== 'src' ? file.dest : null;
                     //Run Tests In Parallel
                     if (file.src) {
                         grunt.util.async.forEachLimit(file.src, fileConcurrency, function (srcFile, next) {
-                            var fixtures = getFixture(srcFile, options.fixtures, 10);
-                            if (fixtures) {
-                                fileConcurrency = 1;
-                                grunt.util.async.forEachLimit(fixtures, 10, function (fixture, nextFixture) {
-                                    addFixtureToOptions(fixture);
-                                    casperlib.execute(srcFile, file.dest !== 'src' ? file.dest : null, options, args, nextFixture);
-                                });
-                            } else {
-                                fileConcurrency = originalFileConcurrency;
-                                casperlib.execute(srcFile, file.dest !== 'src' ? file.dest : null, options, args, next);
+                            var testOptions = Array.prototype.slice.call(options);
+                            if (typeof fixtures[srcFile] !== 'undefined') {
+                                testOptions.fixture = fixtures[srcFile].pop();
                             }
+
+                            casperlib.execute(srcFile, dest, testOptions, args, next);
                         }, function (err) {
                             if (err) grunt.log.write('error:', err);
                             //Call Done and Log Duration
