@@ -37,7 +37,10 @@ module.exports = function (grunt) {
 
         grunt.verbose.writeflags(args, 'Arguments');
 
-        var getFixture = function (file, fixtureDir, chunkSize) {
+        var fixtureDir = options.fixtureDir ? options.fixtureDir : '';
+        delete options.fixtureDir;
+
+        var getFixture = function (file, chunkSize) {
             // because its not a string
             var splitStore = path.resolve(file).split('/');
             var fileName = splitStore.pop().replace('.js', '.json');
@@ -51,6 +54,7 @@ module.exports = function (grunt) {
 
             return false;
         };
+
 
         this.files.forEach(function (file) {
             if (file.src.length) {
@@ -79,7 +83,7 @@ module.exports = function (grunt) {
                     if (file.src) {
                         var fixtures = [];
                         file.src.forEach(function (srcFile) {
-                            var fixture = getFixture(srcFile, options.fixtures, fileConcurrency);
+                            var fixture = getFixture(srcFile, fileConcurrency);
                             if (fixture) {
                                 fixtures[srcFile] = [];
                                 fixture.forEach(function (item, index) {
@@ -92,12 +96,12 @@ module.exports = function (grunt) {
                             }
                         });
                         grunt.util.async.forEachLimit(file.src, fileConcurrency, function (srcFile, next) {
-                            if(typeof options.fixture !== 'undefined'){
-                                delete options.fixture;
+                            if(options.fixtures){
+                                delete options.fixtures;
                             }
 
                             if (typeof fixtures[srcFile] !== 'undefined' && fixtures[srcFile].length) {
-                                options.fixture = escape(JSON.stringify(fixtures[srcFile].pop()));
+                                options.fixtures = escape(JSON.stringify(fixtures[srcFile].pop()));
                                 grunt.log.ok(' ==> Fixture parts left ' + fixtures[srcFile].length + ' for file ' + srcFile);
                             }
 
@@ -119,9 +123,5 @@ module.exports = function (grunt) {
                 grunt.fail.warn('Unable to compile; no valid source files were found.');
             }
         });
-
-        if (options.fixtures) {
-            delete options.fixtures;
-        }
     });
 };
