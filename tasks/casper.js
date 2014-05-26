@@ -55,9 +55,10 @@ module.exports = function (grunt) {
             // because its not a string
             var splitStore = path.resolve(file).split('/');
             var fileName = splitStore.pop().replace('.js', '.json');
-            var tag = splitStore.pop();
-            var fixture = path.resolve(fixtureDir + '/' + tag + '/' + fileName);
+
+            var fixture = path.resolve(fixtureDir + '/' + fileName);
             // file exists ?
+            grunt.verbose.writeln(' ==> fixture file ' + fixture);
             if (grunt.file.exists(fixture)) {
                 var fixtureData = grunt.file.readJSON(fixture);
                 return fixtureData.chunk(chunkSize);
@@ -94,6 +95,7 @@ module.exports = function (grunt) {
                     if (file.src) {
                         var fixtures = [];
                         file.src.forEach(function (srcFile) {
+                            grunt.verbose.writeln(' ==> src file ' + srcFile);
                             var fixture = getFixture(srcFile, chunkSize);
                             if (fixture) {
                                 // if just one item is there
@@ -108,6 +110,7 @@ module.exports = function (grunt) {
                                 });
                             }
                         });
+
                         grunt.util.async.forEachLimit(file.src, fileConcurrency, function (srcFile, next) {
                             if (options.fixtures) {
                                 delete options.fixtures;
