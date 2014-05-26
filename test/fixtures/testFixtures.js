@@ -16,5 +16,5 @@ var run = function(fixture, index){
 };
 
 for(var i = 0; i < fixtures.length; i++){
-    run(fixtures[o], i);
+    run(fixtures[i], i);
 }
