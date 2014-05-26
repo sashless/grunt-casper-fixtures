@@ -89,10 +89,13 @@ module.exports = function (grunt) {
                             }
                         });
                         grunt.util.async.forEachLimit(file.src, fileConcurrency, function (srcFile, next) {
-                            if (typeof fixtures[srcFile] !== 'undefined') {
-                                options.fixture = fixtures[srcFile].pop();
-                            }else{
+                            if(typeof options.fixture !== 'undefined'){
                                 delete options.fixture;
+                            }
+
+                            if (typeof fixtures[srcFile] !== 'undefined' && fixtures[srcFile].length) {
+                                options.fixture = escape(JSON.stringify(fixtures[srcFile].pop()));
+                                grunt.log.ok(' ==> Fixture parts left ' + fixtures[srcFile].length + ' for file ' + srcFile);
                             }
 
                             casperlib.execute(srcFile, dest, options, args, next);
