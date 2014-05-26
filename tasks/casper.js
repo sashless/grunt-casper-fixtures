@@ -89,16 +89,11 @@ module.exports = function (grunt) {
                                 grunt.util.async.forEachLimit(fixtures, 10, function (fixture, nextFixture) {
                                     addFixtureToOptions(fixture);
                                     casperlib.execute(srcFile, file.dest !== 'src' ? file.dest : null, options, args, nextFixture);
-                                }, function (err) {
-                                    if (err) grunt.log.write('error:', err);
-                                    //Call Done and Log Duration
-                                    taskComplete(err);
                                 });
                             } else {
                                 fileConcurrency = originalFileConcurrency;
                                 casperlib.execute(srcFile, file.dest !== 'src' ? file.dest : null, options, args, next);
                             }
-
                         }, function (err) {
                             if (err) grunt.log.write('error:', err);
                             //Call Done and Log Duration
@@ -108,7 +103,6 @@ module.exports = function (grunt) {
                 } else {
                     if (file.src) {
                         casperlib.execute(file.src, file.dest, options, args, function (err) {
-                            //Call Done and Log Duration
                             taskComplete(err);
                         });
                     }
