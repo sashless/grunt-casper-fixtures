@@ -116,7 +116,6 @@ module.exports = function (grunt) {
             fixture: {
                 options: {
                     test: true,
-                    concise: true,
                     chunkSize: 2, // number of chunks created from json fixture
                     fixtureDir: path.resolve('test/fixtures/'),
                     parallel: true,
