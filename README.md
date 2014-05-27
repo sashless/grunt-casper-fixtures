@@ -136,6 +136,8 @@ casper : {
 
 Using fixtures
 
+Fixtures are found by matching the same name as the testfile but as `.json`.
+
 ```js
 casper : {
     yourTask: {
