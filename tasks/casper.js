@@ -37,7 +37,7 @@ module.exports = function (grunt) {
 
         grunt.verbose.writeflags(args, 'Arguments');
 
-        var fixtureDir = '';
+        var fixtureDir = false;
 
         if (options.fixtureDir) {
             fixtureDir = options.fixtureDir;
@@ -94,22 +94,24 @@ module.exports = function (grunt) {
                     //Run Tests In Parallel
                     if (file.src) {
                         var fixtures = [];
-                        file.src.forEach(function (srcFile) {
-                            grunt.verbose.writeln(' ==> src file ' + srcFile);
-                            var fixture = getFixture(srcFile, chunkSize);
-                            if (fixture) {
-                                // if just one item is there
-                                fixtures[srcFile] = [fixture.pop()];
-                                // for multiple items
-                                fixture.forEach(function (item, index) {
-                                    //because its already there one time
-                                    if (index < fixture.length - 1) {
-                                        file.src.push(srcFile);
-                                    }
-                                    fixtures[srcFile].push(item);
-                                });
-                            }
-                        });
+                        if(fixtureDir){
+                            file.src.forEach(function (srcFile) {
+                                grunt.verbose.writeln(' ==> src file ' + srcFile);
+                                var fixture = getFixture(srcFile, chunkSize);
+                                if (fixture) {
+                                    // if just one item is there
+                                    fixtures[srcFile] = [fixture.pop()];
+                                    // for multiple items
+                                    fixture.forEach(function (item, index) {
+                                        //because its already there one time
+                                        if (index < fixture.length - 1) {
+                                            file.src.push(srcFile);
+                                        }
+                                        fixtures[srcFile].push(item);
+                                    });
+                                }
+                            });
+                        }
 
                         grunt.util.async.forEachLimit(file.src, fileConcurrency, function (srcFile, next) {
                             if (options.fixtures) {

@@ -95,6 +95,11 @@ Default: phantomjs
 
 Specify Browser Engine (phantomjs|slimerjs)
 
+#### fixtureDir
+Type: 'string'
+Default: false
+
+Only available when `parallel: true`
 
 ### Usage Examples
 
