@@ -101,6 +101,13 @@ Default: false
 
 Only available when `parallel: true`
 
+#### chunkSize
+Type: 'integer'
+Default: 10
+
+Number of chunk created from `json` fixture.
+Only available when `fixtureDir` is set.
+
 ### Usage Examples
 
 Basic usage
@@ -144,7 +151,7 @@ casper : {
         options: {
             test: true,
             concise: true,
-            chunkSize: 2, // number of chunks created from json fixture
+            chunkSize: 2,
             fixtureDir: path.resolve('test/fixtures/'),
             parallel: true,
             concurrency: 5
