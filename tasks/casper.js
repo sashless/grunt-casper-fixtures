@@ -29,7 +29,9 @@ module.exports = function (grunt) {
         function taskComplete(error) {
             var msg = "Casper Task '" + taskName + "' took ~" + new Duration(startTime).milliseconds + "ms to run";
             grunt.log.success(msg);
+
             if (error) {
+                grunt.log.write('error:', error);
                 return done(false);
             }
             done();
@@ -126,7 +128,6 @@ module.exports = function (grunt) {
 
                             casperlib.execute(srcFile, dest, options, args, next);
                         }, function (err) {
-                            if (err) grunt.log.write('error:', err);
                             //Call Done and Log Duration
                             taskComplete(err);
                         });
