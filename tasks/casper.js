@@ -64,7 +64,7 @@ module.exports = function (grunt) {
                 return fixtureData.chunk(chunkSize);
             }
 
-            return false;
+            return [];
         };
 
 
@@ -98,7 +98,7 @@ module.exports = function (grunt) {
                             file.src.forEach(function (srcFile) {
                                 grunt.verbose.writeln(' ==> src file ' + srcFile);
                                 var fixture = getFixture(srcFile, chunkSize);
-                                if (fixture) {
+                                if (fixture.length) {
                                     // if just one item is there
                                     fixtures[srcFile] = [fixture.pop()];
                                     // for multiple items
