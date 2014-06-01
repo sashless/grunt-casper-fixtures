@@ -60,8 +60,8 @@ module.exports = function (grunt) {
 
             var fixture = path.resolve(fixtureDir + '/' + fileName);
             // file exists ?
-            grunt.verbose.writeln(' ==> fixture file ' + fixture);
             if (grunt.file.exists(fixture)) {
+                grunt.verbose.writeln(' ==> fixture file ' + fixture);
                 var fixtureData = grunt.file.readJSON(fixture);
                 return fixtureData.chunk(chunkSize);
             }
@@ -127,16 +127,11 @@ module.exports = function (grunt) {
                             }
 
                             casperlib.execute(srcFile, dest, options, args, next);
-                        }, function (err) {
-                            //Call Done and Log Duration
-                            taskComplete(err);
-                        });
+                        }, taskComplete);
                     }
                 } else {
                     if (file.src) {
-                        casperlib.execute(file.src, file.dest, options, args, function (err) {
-                            taskComplete(err);
-                        });
+                        casperlib.execute(file.src, file.dest, options, args, taskComplete);
                     }
                 }
             } else {
