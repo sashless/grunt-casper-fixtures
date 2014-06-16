@@ -104,12 +104,9 @@ module.exports = function (grunt) {
                                     // if just one item is there
                                     fixtures[srcFile] = [fixture.pop()];
                                     // for multiple items
-                                    fixture.forEach(function (item, index) {
-                                        //because its already there one time
-                                        if (index < fixture.length - 1) {
-                                            // add multiple entries for every fixture chunk
-                                            file.src.push(srcFile);
-                                        }
+                                    fixture.forEach(function (item) {
+                                        // add multiple entries for every fixture chunk
+                                        file.src.push(srcFile);
                                         fixtures[srcFile].push(item);
                                     });
                                 }
